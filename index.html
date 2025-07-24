@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRC Compliance Assessment Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Disclaimer Header -->
+        <div class="disclaimer-header">
+            <div class="disclaimer-content">
+                <p><strong>🔒 Privacy Notice:</strong> All data is processed locally on your device. No information is sent to external servers. This tool is open-source and available on <a href="https://github.com/qusaismael/GRC-check" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+                <p class="attribution">Made with accuracy by <a href="https://qusai.pro" target="_blank" rel="noopener noreferrer">@qusaismael</a></p>
+            </div>
+        </div>
+
+        <header class="header">
+            <h1>GRC Compliance Assessment</h1>
+            <p>Comprehensive compliance evaluation tool for Jordan Data Protection Law and ISO 27001 standards</p>
+        </header>
+
+        <section class="controls">
+            <div class="controls-row">
+                <div class="control-group">
+                    <label for="checklist-select">Select Compliance Framework:</label>
+                    <select id="checklist-select">
+                        <option value="jordan_law">Jordan Data Protection Law</option>
+                        <option value="iso_27001">ISO 27001 Security Framework</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <button id="export-btn">📄 Export Report</button>
+                </div>
+            </div>
+            
+            <div class="controls-row file-controls">
+                <div class="control-group">
+                    <label for="company-logo">📋 Company Logo:</label>
+                    <input type="file" id="company-logo" accept="image/*" class="file-input">
+                </div>
+                <div class="control-group">
+                    <label for="signature">✍️ Signature:</label>
+                    <input type="file" id="signature" accept="image/*" class="file-input">
+                </div>
+            </div>
+        </section>
+
+        <main class="main-content">
+            <div class="questionnaire-section">
+                <div id="questionnaire" class="questionnaire-container">
+                    <!-- Questions will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <aside class="score-sidebar">
+                <div class="score-panel">
+                    <h2>Compliance Score</h2>
+                    <div class="score-display">
+                        <div id="score-circle">
+                            <div id="score-text">100%</div>
+                        </div>
+                    </div>
+                    <p class="score-description">Please make sure to answer all the questions to get the most accurate score, and make sure to answer the questions accurately.</p>
+                    <div class="score-stats">
+                        <div class="stat-item">
+                            <span class="stat-value" id="answered-count">0</span>
+                            <span class="stat-label">Answered</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="total-count">0</span>
+                            <span class="stat-label">Total</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- Mobile Floating Score Button -->
+    <div class="mobile-score-float" id="mobile-score-float">
+        <button class="floating-score-btn" id="floating-score-btn">
+            <span class="floating-score-text" id="floating-score-text">100%</span>
+            <span class="floating-score-icon">📊</span>
+        </button>
+        
+        <div class="floating-score-popup" id="floating-score-popup">
+            <div class="popup-header">
+                <h3>Compliance Score</h3>
+                <button class="popup-close" id="popup-close">×</button>
+            </div>
+            <div class="popup-score-display">
+                <div class="popup-score-circle" id="popup-score-circle">
+                    <div class="popup-score-text" id="popup-score-text">100%</div>
+                </div>
+            </div>
+            <div class="popup-stats">
+                <div class="popup-stat-item">
+                    <span class="popup-stat-value" id="popup-answered-count">0</span>
+                    <span class="popup-stat-label">Answered</span>
+                </div>
+                <div class="popup-stat-item">
+                    <span class="popup-stat-value" id="popup-total-count">0</span>
+                    <span class="popup-stat-label">Total</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
