@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -33,11 +34,21 @@
                     </select>
                 </div>
                 <div class="control-group">
-                    <button id="export-btn">📄 Export Report</button>
+                    <div class="export-dropdown">
+                        <button id="export-btn" class="export-main-btn">📄 Export Report</button>
+                        <div class="export-options">
+                            <button id="export-pdf" class="export-option">📄 Export as PDF</button>
+                            <button id="export-excel" class="export-option">📊 Export as Excel</button>
+                        </div>
+                    </div>
                 </div>
             </div>
             
             <div class="controls-row file-controls">
+                <div class="file-controls-header">
+                    <span class="file-controls-title">📋 Report Customization</span>
+                    <span class="file-controls-note">(Both logo and signature are optional)</span>
+                </div>
                 <div class="control-group">
                     <label for="company-logo">📋 Company Logo:</label>
                     <input type="file" id="company-logo" accept="image/*" class="file-input">

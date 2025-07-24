@@ -130,6 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const scoreCircle = document.getElementById('score-circle');
     const scoreText = document.getElementById('score-text');
     const exportBtn = document.getElementById('export-btn');
+    const exportPdfBtn = document.getElementById('export-pdf');
+    const exportExcelBtn = document.getElementById('export-excel');
     const checklistSelect = document.getElementById('checklist-select');
     const companyLogoInput = document.getElementById('company-logo');
     const signatureInput = document.getElementById('signature');
@@ -451,7 +453,254 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.text(`Page ${i} of ${pageCount}`, 105, 295, { align: 'center' });
         }
 
-        doc.save(`Compliance-Report-${currentCategory.replace('_', '-')}.pdf`);
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+        doc.save(`Compliance-Report-${currentCategory.replace('_', '-')}-${timestamp}.pdf`);
+    }
+
+    function exportToExcel() {
+        const answeredQuestions = questions.filter(q => userAnswers[q.id]?.category === currentCategory);
+        const yesAnswers = answeredQuestions.filter(q => userAnswers[q.id].answer === 'yes');
+        const noAnswers = answeredQuestions.filter(q => userAnswers[q.id].answer === 'no');
+        const score = answeredQuestions.length > 0 ? Math.round((yesAnswers.length / answeredQuestions.length) * 100) : 100;
+        
+        // Create workbook
+        const wb = XLSX.utils.book_new();
+        
+        // Main Report Sheet - Comprehensive Overview
+        const reportData = [
+            ['GRC COMPLIANCE ASSESSMENT REPORT'],
+            [''],
+            ['Assessment Details:'],
+            ['Framework:', checklistSelect.options[checklistSelect.selectedIndex].text],
+            ['Assessment Date:', new Date().toLocaleDateString()],
+            ['Assessment Time:', new Date().toLocaleTimeString()],
+            [''],
+            ['COMPLIANCE SCORE:', `${score}%`],
+            [''],
+            ['SUMMARY:'],
+            ['Total Questions:', questions.filter(q => q.category === currentCategory).length],
+            ['Questions Answered:', answeredQuestions.length],
+            ['Compliant (YES):', yesAnswers.length],
+            ['Non-Compliant (NO):', noAnswers.length],
+            ['Pending Review:', questions.filter(q => q.category === currentCategory).length - answeredQuestions.length],
+            [''],
+            ['DETAILED ASSESSMENT RESULTS:'],
+            [''],
+            ['Article', 'Question', 'Answer', 'Notes', 'Compliance Status']
+        ];
+        
+        // Add all questions from the current category
+        const allCategoryQuestions = questions.filter(q => q.category === currentCategory);
+        allCategoryQuestions.forEach(q => {
+            const answer = userAnswers[q.id];
+            let answerText = 'NOT ANSWERED';
+            let notes = 'No response provided';
+            let status = 'PENDING REVIEW';
+            
+            if (answer) {
+                answerText = answer.answer.toUpperCase();
+                notes = answer.note && answer.note.trim() ? answer.note : 'No additional notes provided';
+                status = answer.answer === 'yes' ? 'COMPLIANT' : 'NON-COMPLIANT';
+            }
+            
+            reportData.push([
+                q.article,
+                q.question.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ''), // Remove HTML tags and entities
+                answerText,
+                notes,
+                status
+            ]);
+        });
+        
+        // Add summary footer
+        reportData.push(['']);
+        reportData.push(['REPORT SUMMARY:']);
+        reportData.push(['Compliance Rate:', `${score}%`]);
+        reportData.push(['Assessment Completion Rate:', `${Math.round((answeredQuestions.length / allCategoryQuestions.length) * 100)}%`]);
+        reportData.push(['']);
+        reportData.push(['PRIVACY NOTICE:']);
+        reportData.push(['All data processed locally on your device']);
+        reportData.push(['No information sent to external servers']);
+        reportData.push(['Tool source: https://github.com/qusaismael/GRC-check']);
+        reportData.push(['Created by: @qusaismael - https://qusai.pro']);
+        
+        const reportWs = XLSX.utils.aoa_to_sheet(reportData);
+        
+        // Enhanced formatting for main report
+        reportWs['!merges'] = [
+            { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } }, // Title
+            { s: { r: 2, c: 0 }, e: { r: 2, c: 1 } }, // Assessment Details
+            { s: { r: 7, c: 0 }, e: { r: 7, c: 1 } }, // Compliance Score
+            { s: { r: 9, c: 0 }, e: { r: 9, c: 1 } }, // Summary
+            { s: { r: 16, c: 0 }, e: { r: 16, c: 4 } } // Detailed Results
+        ];
+        
+        // Set optimal column widths
+        reportWs['!cols'] = [
+            { width: 18 }, // Article
+            { width: 85 }, // Question (wider for full text)
+            { width: 15 }, // Answer
+            { width: 50 }, // Notes (wider for full notes)
+            { width: 20 }  // Status
+        ];
+        
+        // Add auto-filter to the data
+        reportWs['!autofilter'] = { ref: `A19:E${19 + allCategoryQuestions.length - 1}` };
+        
+        XLSX.utils.book_append_sheet(wb, reportWs, 'Complete Assessment');
+        
+        // Compliant Areas Sheet (Only YES answers with full details)
+        if (yesAnswers.length > 0) {
+            const compliantData = [
+                ['COMPLIANT AREAS - DETAILED REPORT'],
+                ['Areas where your organization meets compliance requirements'],
+                [''],
+                ['Article', 'Compliance Requirement', 'Implementation Notes', 'Verification Status']
+            ];
+            
+            yesAnswers.forEach((q, index) => {
+                const answer = userAnswers[q.id];
+                compliantData.push([
+                    q.article,
+                    q.question.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ''),
+                    answer.note && answer.note.trim() ? answer.note : 'Requirement met - no additional notes',
+                    'VERIFIED COMPLIANT'
+                ]);
+            });
+            
+            compliantData.push(['']);
+            compliantData.push(['COMPLIANT AREAS SUMMARY:']);
+            compliantData.push(['Total Compliant Areas:', yesAnswers.length]);
+            compliantData.push(['Compliance Achievement:', `${Math.round((yesAnswers.length / allCategoryQuestions.length) * 100)}%`]);
+            compliantData.push(['']);
+            compliantData.push(['RECOMMENDATIONS:']);
+            compliantData.push(['✓ Maintain current compliance standards']);
+            compliantData.push(['✓ Document best practices for future reference']);
+            compliantData.push(['✓ Regular monitoring to ensure continued compliance']);
+            compliantData.push(['✓ Share successful implementations across organization']);
+            
+            const compliantWs = XLSX.utils.aoa_to_sheet(compliantData);
+            
+            compliantWs['!merges'] = [
+                { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }, // Title
+                { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } }  // Subtitle
+            ];
+            
+            compliantWs['!cols'] = [
+                { width: 18 }, // Article
+                { width: 75 }, // Question
+                { width: 45 }, // Notes
+                { width: 20 }  // Status
+            ];
+            
+            XLSX.utils.book_append_sheet(wb, compliantWs, 'Compliant Areas');
+        }
+        
+        // Non-Compliant Areas Sheet (Only NO answers with action plans)
+        if (noAnswers.length > 0) {
+            const nonCompliantData = [
+                ['AREAS REQUIRING IMMEDIATE ATTENTION'],
+                ['Critical compliance gaps that need to be addressed'],
+                [''],
+                ['Article', 'Compliance Requirement', 'Current Gap Analysis', 'Priority Level', 'Recommended Action']
+            ];
+            
+            noAnswers.forEach((q, index) => {
+                const answer = userAnswers[q.id];
+                const priority = index < Math.ceil(noAnswers.length / 3) ? 'HIGH' : 
+                               index < Math.ceil(noAnswers.length * 2/3) ? 'MEDIUM' : 'STANDARD';
+                
+                nonCompliantData.push([
+                    q.article,
+                    q.question.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ''),
+                    answer.note && answer.note.trim() ? answer.note : 'Compliance gap identified - requires implementation',
+                    priority,
+                    'Immediate implementation required'
+                ]);
+            });
+            
+            nonCompliantData.push(['']);
+            nonCompliantData.push(['NON-COMPLIANCE SUMMARY:']);
+            nonCompliantData.push(['Total Areas Requiring Action:', noAnswers.length]);
+            nonCompliantData.push(['Risk Level:', noAnswers.length > allCategoryQuestions.length * 0.5 ? 'HIGH' : 'MODERATE']);
+            nonCompliantData.push(['']);
+            nonCompliantData.push(['ACTION PLAN RECOMMENDATIONS:']);
+            nonCompliantData.push(['1. Prioritize HIGH priority items for immediate action']);
+            nonCompliantData.push(['2. Develop implementation timeline for each requirement']);
+            nonCompliantData.push(['3. Assign responsible team members for each area']);
+            nonCompliantData.push(['4. Establish regular review and monitoring processes']);
+            nonCompliantData.push(['5. Schedule follow-up assessments to track progress']);
+            nonCompliantData.push(['6. Document all remediation efforts for audit trails']);
+            
+            const nonCompliantWs = XLSX.utils.aoa_to_sheet(nonCompliantData);
+            
+            nonCompliantWs['!merges'] = [
+                { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } }, // Title
+                { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } }  // Subtitle
+            ];
+            
+            nonCompliantWs['!cols'] = [
+                { width: 18 }, // Article
+                { width: 65 }, // Question
+                { width: 40 }, // Notes
+                { width: 15 }, // Priority
+                { width: 25 }  // Action
+            ];
+            
+            XLSX.utils.book_append_sheet(wb, nonCompliantWs, 'Action Required');
+        }
+        
+        // Executive Summary Sheet
+        const execData = [
+            ['EXECUTIVE SUMMARY'],
+            ['GRC Compliance Assessment Report'],
+            [''],
+            ['KEY METRICS:'],
+            ['Overall Compliance Score:', `${score}%`],
+            ['Assessment Completion Rate:', `${Math.round((answeredQuestions.length / allCategoryQuestions.length) * 100)}%`],
+            ['Framework Assessed:', checklistSelect.options[checklistSelect.selectedIndex].text],
+            ['Assessment Date:', new Date().toLocaleDateString()],
+            [''],
+            ['COMPLIANCE BREAKDOWN:'],
+            ['Fully Compliant Areas:', yesAnswers.length],
+            ['Areas Requiring Action:', noAnswers.length],
+            ['Pending Assessment:', allCategoryQuestions.length - answeredQuestions.length],
+            [''],
+            ['RISK ASSESSMENT:'],
+            ['Overall Risk Level:', score >= 80 ? 'LOW' : score >= 60 ? 'MODERATE' : 'HIGH'],
+            ['Immediate Action Required:', noAnswers.length > 0 ? 'YES' : 'NO'],
+            [''],
+            ['NEXT STEPS:'],
+            ['1. Review all non-compliant areas immediately'],
+            ['2. Develop comprehensive remediation plan'],
+            ['3. Assign ownership for each compliance gap'],
+            ['4. Set target dates for full compliance'],
+            ['5. Schedule regular compliance monitoring'],
+            [''],
+            ['REPORT DETAILS:'],
+            ['Generated:', new Date().toLocaleString()],
+            ['Data Privacy:', 'All processing done locally'],
+            ['Tool Source:', 'https://github.com/qusaismael/GRC-check'],
+            ['Support:', '@qusaismael - https://qusai.pro']
+        ];
+        
+        const execWs = XLSX.utils.aoa_to_sheet(execData);
+        
+        execWs['!merges'] = [
+            { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }, // Title
+            { s: { r: 1, c: 0 }, e: { r: 1, c: 1 } }  // Subtitle
+        ];
+        
+        execWs['!cols'] = [
+            { width: 30 },
+            { width: 40 }
+        ];
+        
+        XLSX.utils.book_append_sheet(wb, execWs, 'Executive Summary');
+        
+        // Export with timestamp
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+        XLSX.writeFile(wb, `GRC-Compliance-Assessment-${currentCategory.replace('_', '-')}-${timestamp}.xlsx`);
     }
 
     function handleCategoryChange(e) {
@@ -478,6 +727,8 @@ document.addEventListener('DOMContentLoaded', () => {
     questionnaireContainer.addEventListener('click', handleAnswerClick);
     questionnaireContainer.addEventListener('input', handleNoteChange);
     exportBtn.addEventListener('click', exportToPDF);
+    exportPdfBtn.addEventListener('click', exportToPDF);
+    exportExcelBtn.addEventListener('click', exportToExcel);
     checklistSelect.addEventListener('change', handleCategoryChange);
     companyLogoInput.addEventListener('change', handleLogoUpload);
     signatureInput.addEventListener('change', handleSignatureUpload);
