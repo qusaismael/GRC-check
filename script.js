@@ -159,12 +159,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="article-title">${q.article}</div>
                 <p>${q.question}</p>
                 <div class="button-group">
-                    <button class="yes-btn ${currentAnswer?.answer === 'yes' ? 'answered' : ''}" 
-                            data-id="${q.id}" data-answer="yes" 
-                            ${currentAnswer?.answer ? 'disabled' : ''}>Yes</button>
-                    <button class="no-btn ${currentAnswer?.answer === 'no' ? 'answered' : ''}" 
-                            data-id="${q.id}" data-answer="no" 
-                            ${currentAnswer?.answer ? 'disabled' : ''}>No</button>
+                    <div class="answer-row">
+                        <button class="yes-btn ${currentAnswer?.answer === 'yes' ? 'answered' : ''}" 
+                                data-id="${q.id}" data-answer="yes">Yes</button>
+                        <button class="no-btn ${currentAnswer?.answer === 'no' ? 'answered' : ''}" 
+                                data-id="${q.id}" data-answer="no">No</button>
+                    </div>
+                    ${currentAnswer?.answer ? '<button class="edit-btn" data-id="' + q.id + '">Edit Choice</button>' : ''}
                 </div>
                 <div class="note-section">
                     <label for="note-${q.id}">Notes (optional):</label>
@@ -189,17 +190,17 @@ document.addEventListener('DOMContentLoaded', () => {
         popupTotalCount.textContent = filteredQuestions.length;
         
         if (answeredQuestions.length === 0) {
-            scoreText.textContent = '100%';
-            floatingScoreText.textContent = '100%';
-            popupScoreText.textContent = '100%';
-            const fullCircleGradient = `conic-gradient(var(--success-color) 360deg, var(--danger-color) 0deg)`;
-            scoreCircle.style.background = fullCircleGradient;
-            popupScoreCircle.style.background = fullCircleGradient;
+            scoreText.textContent = '0%';
+            floatingScoreText.textContent = '0%';
+            popupScoreText.textContent = '0%';
+            const noProgressGradient = `conic-gradient(var(--border-color) 360deg, var(--border-color) 0deg)`;
+            scoreCircle.style.background = noProgressGradient;
+            popupScoreCircle.style.background = noProgressGradient;
             return;
         }
 
         const yesAnswers = answeredQuestions.filter(ans => ans.answer === 'yes').length;
-        const score = Math.round((yesAnswers / answeredQuestions.length) * 100);
+        const score = Math.round((yesAnswers / filteredQuestions.length) * 100); // Use total questions as denominator
         
         scoreText.textContent = `${score}%`;
         floatingScoreText.textContent = `${score}%`;
@@ -218,21 +219,54 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function handleAnswerClick(e) {
         const target = e.target;
-        if (!target.matches('.yes-btn, .no-btn')) return;
+        if (!target.matches('.yes-btn, .no-btn, .edit-btn')) return;
 
         const id = parseInt(target.dataset.id, 10);
+        
+        if (target.classList.contains('edit-btn')) {
+            // Handle edit button click - allow changing answer
+            const buttonGroup = target.parentElement;
+            const answerRow = buttonGroup.querySelector('.answer-row');
+            const yesBtn = answerRow.querySelector('.yes-btn');
+            const noBtn = answerRow.querySelector('.no-btn');
+            
+            // Remove answered styling and enable editing
+            yesBtn.classList.remove('answered');
+            noBtn.classList.remove('answered');
+            
+            // Remove the edit button
+            target.remove();
+            
+            return;
+        }
+
         const answer = target.dataset.answer;
         
         const existingNote = userAnswers[id]?.note || '';
         
         userAnswers[id] = { answer, category: currentCategory, note: existingNote };
         
-        const buttonGroup = target.parentElement;
-        Array.from(buttonGroup.children).forEach(btn => {
-            btn.disabled = true;
-            btn.classList.remove('answered');
-        });
+        const buttonGroup = target.parentElement.parentElement; // Now we need to go up two levels since target is in answer-row
+        const answerRow = buttonGroup.querySelector('.answer-row');
+        const yesBtn = answerRow.querySelector('.yes-btn');
+        const noBtn = answerRow.querySelector('.no-btn');
+        
+        // Remove answered styling from both buttons
+        yesBtn.classList.remove('answered');
+        noBtn.classList.remove('answered');
+        
+        // Add answered styling to clicked button
         target.classList.add('answered');
+        
+        // Add or update edit button
+        let editBtn = buttonGroup.querySelector('.edit-btn');
+        if (!editBtn) {
+            editBtn = document.createElement('button');
+            editBtn.className = 'edit-btn';
+            editBtn.dataset.id = id;
+            editBtn.textContent = 'Edit Choice';
+            buttonGroup.appendChild(editBtn);
+        }
         
         updateScore();
     }
@@ -316,7 +350,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const answeredQuestions = questions.filter(q => userAnswers[q.id]?.category === currentCategory);
         const yesAnswers = answeredQuestions.filter(q => userAnswers[q.id].answer === 'yes');
         const noAnswers = answeredQuestions.filter(q => userAnswers[q.id].answer === 'no');
-        const score = answeredQuestions.length > 0 ? Math.round((yesAnswers.length / answeredQuestions.length) * 100) : 100;
+        const totalQuestions = questions.filter(q => q.category === currentCategory);
+        const score = answeredQuestions.length > 0 ? Math.round((yesAnswers.length / totalQuestions.length) * 100) : 0;
         
         let yPos = 20;
         if (companyLogo) {
@@ -461,7 +496,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const answeredQuestions = questions.filter(q => userAnswers[q.id]?.category === currentCategory);
         const yesAnswers = answeredQuestions.filter(q => userAnswers[q.id].answer === 'yes');
         const noAnswers = answeredQuestions.filter(q => userAnswers[q.id].answer === 'no');
-        const score = answeredQuestions.length > 0 ? Math.round((yesAnswers.length / answeredQuestions.length) * 100) : 100;
+        const totalQuestions = questions.filter(q => q.category === currentCategory);
+        const score = answeredQuestions.length > 0 ? Math.round((yesAnswers.length / totalQuestions.length) * 100) : 0;
         
         // Create workbook
         const wb = XLSX.utils.book_new();
@@ -736,6 +772,27 @@ document.addEventListener('DOMContentLoaded', () => {
     floatingScoreBtn.addEventListener('click', toggleFloatingPopup);
     popupClose.addEventListener('click', closeFloatingPopup);
     document.addEventListener('click', handleOutsideClick);
+    
+    // Back to Top Button functionality
+    const backToTopBtn = document.getElementById('back-to-top');
+    
+    function handleScroll() {
+        if (window.pageYOffset > 300) {
+            backToTopBtn.classList.add('show');
+        } else {
+            backToTopBtn.classList.remove('show');
+        }
+    }
+    
+    function scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+    
+    window.addEventListener('scroll', handleScroll);
+    backToTopBtn.addEventListener('click', scrollToTop);
     
     renderQuestions();
     updateScore();
