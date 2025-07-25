@@ -580,10 +580,16 @@ body {
 }
 
 .button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.button-group .answer-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
-    margin-bottom: 1.5rem;
 }
 
 .yes-btn, .no-btn {
@@ -638,6 +644,34 @@ body {
     background: var(--gradient-danger);
     box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.3), var(--shadow-medium);
     transform: scale(1.02);
+}
+
+.edit-btn {
+    padding: 0.8rem 1.5rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    background: transparent;
+    color: var(--primary-color);
+    margin-top: 0.5rem;
+}
+
+.edit-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.edit-btn:active {
+    transform: translateY(0);
 }
 
 /* Note Section Styles */
@@ -1032,7 +1066,12 @@ body {
     }
     
     .button-group {
+        gap: 1rem;
+    }
+    
+    .button-group .answer-row {
         grid-template-columns: 1fr;
+        gap: 1rem;
     }
     
     .score-panel .score-display {
@@ -1284,5 +1323,65 @@ body {
 
 .floating-score-btn.pulse {
     animation: pulse 2s infinite;
+}
+
+/* Back to Top Button */
+.back-to-top {
+    position: fixed;
+    bottom: 120px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: var(--gradient-primary);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow-large);
+    transition: all 0.3s ease;
+    z-index: 9998;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid white;
+}
+
+.back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.back-to-top:hover {
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.back-to-top:active {
+    transform: translateY(-2px) scale(0.95);
+}
+
+.back-to-top-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+    font-weight: 900;
+}
+
+@media (max-width: 768px) {
+    .back-to-top {
+        bottom: 110px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+    
+    .back-to-top-icon {
+        font-size: 1.5rem;
+    }
 }
 
