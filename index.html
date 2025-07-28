@@ -130,6 +130,58 @@
         <span class="back-to-top-icon">↑</span>
     </button>
 
+    <!-- Consent Popup Modal -->
+    <div class="consent-modal" id="consent-modal">
+        <div class="consent-modal-content">
+            <div class="consent-header">
+                <h2>⚠️ Important Legal Notice</h2>
+                <p>Please read and agree to the following terms before using this tool</p>
+            </div>
+            
+            <div class="consent-body">
+                <div class="disclaimer-section">
+                    <h3>Legal Disclaimer</h3>
+                    <p><strong>This tool is NOT affiliated with, endorsed by, or officially connected to:</strong></p>
+                    <ul>
+                        <li><strong>ISO (International Organization for Standardization)</strong> or any ISO standards bodies</li>
+                        <li><strong>Jordanian government entities</strong> or regulatory authorities</li>
+                        <li>Any official compliance certification bodies</li>
+                    </ul>
+                    <p>This is an <strong>independent, open-source project</strong> created for educational and assessment purposes. While the tool references ISO 27001 and Jordan Data Protection Law frameworks, it should not be considered as official legal advice or certification.</p>
+                </div>
+
+                <div class="usage-section">
+                    <h3>Usage Terms</h3>
+                    <p><strong>Users are responsible for:</strong></p>
+                    <ul>
+                        <li>Verifying compliance requirements with official sources</li>
+                        <li>Consulting legal professionals for official compliance matters</li>
+                        <li>Ensuring their own compliance with applicable laws and regulations</li>
+                    </ul>
+                </div>
+
+                <div class="commercial-section">
+                    <h3>📋 Commercial Usage Restriction</h3>
+                    <p>This tool is provided for <strong>educational and personal use only</strong>. <strong>Commercial use, including but not limited to consulting services, commercial assessments, or integration into commercial products, requires explicit written permission from the author.</strong></p>
+                    <p>For commercial licensing inquiries, please contact <a href="https://qusai.pro" target="_blank" rel="noopener noreferrer">@qusaismael</a>.</p>
+                </div>
+            </div>
+
+            <div class="consent-footer">
+                <div class="consent-checkbox">
+                    <input type="checkbox" id="consent-checkbox" required>
+                    <label for="consent-checkbox">
+                        I have read, understood, and agree to the above terms and conditions
+                    </label>
+                </div>
+                <div class="consent-buttons">
+                    <button class="consent-decline" id="consent-decline">Decline</button>
+                    <button class="consent-agree" id="consent-agree" disabled>I Agree & Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
