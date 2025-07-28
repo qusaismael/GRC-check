@@ -1,4 +1,57 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Consent Modal Functionality
+    const consentModal = document.getElementById('consent-modal');
+    const consentCheckbox = document.getElementById('consent-checkbox');
+    const consentAgreeBtn = document.getElementById('consent-agree');
+    const consentDeclineBtn = document.getElementById('consent-decline');
+
+    // Check if user has already consented
+    const hasConsented = localStorage.getItem('grc-consent');
+    
+    if (!hasConsented) {
+        // Show consent modal
+        setTimeout(() => {
+            consentModal.classList.add('show');
+        }, 500);
+    }
+
+    // Handle checkbox change
+    consentCheckbox.addEventListener('change', () => {
+        consentAgreeBtn.disabled = !consentCheckbox.checked;
+    });
+
+    // Handle agree button
+    consentAgreeBtn.addEventListener('click', () => {
+        if (consentCheckbox.checked) {
+            localStorage.setItem('grc-consent', 'true');
+            consentModal.classList.remove('show');
+        }
+    });
+
+    // Handle decline button
+    consentDeclineBtn.addEventListener('click', () => {
+        // Redirect to a simple page or show message
+        document.body.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-family: 'Inter', sans-serif; text-align: center; padding: 2rem;">
+                <div>
+                    <h1 style="color: #f56565; margin-bottom: 1rem;">Access Denied</h1>
+                    <p style="color: #718096; margin-bottom: 2rem;">You must agree to the terms and conditions to use this tool.</p>
+                    <button onclick="location.reload()" style="background: #667eea; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+
+    // Prevent closing modal by clicking outside
+    consentModal.addEventListener('click', (e) => {
+        if (e.target === consentModal) {
+            // Optional: Allow closing by clicking outside
+            // consentModal.classList.remove('show');
+        }
+    });
+
     const questions = [
         { id: 1, category: 'jordan_law', article: 'Article 3.A', question: 'Do you acknowledge that this law applies to all personal data you control, including data collected <strong>before</strong> the law was enacted?' },
         { id: 2, category: 'jordan_law', article: 'Article 4.A', question: 'Do you have a default practice of obtaining prior, explicit consent from individuals before processing their personal data, unless a specific legal exception from Article 6 applies?' },
