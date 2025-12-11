@@ -178,6 +178,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentCategory = 'jordan_law';
     let companyLogo = null;
     let signature = null;
+    let jsPdfLibPromise = null;
+    let xlsxLibPromise = null;
 
     const questionnaireContainer = document.getElementById('questionnaire');
     const scoreCircle = document.getElementById('score-circle');
@@ -396,8 +398,40 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function exportToPDF() {
-        const { jsPDF } = window.jspdf;
+    function loadExternalScript(src) {
+        return new Promise((resolve, reject) => {
+            // Avoid duplicate script tags
+            if (document.querySelector(`script[src="${src}"]`)) {
+                resolve();
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = src;
+            script.async = true;
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error(`Failed to load ${src}`));
+            document.head.appendChild(script);
+        });
+    }
+
+    function getJsPdf() {
+        if (!jsPdfLibPromise) {
+            jsPdfLibPromise = loadExternalScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+                .then(() => window.jspdf);
+        }
+        return jsPdfLibPromise;
+    }
+
+    function getXlsx() {
+        if (!xlsxLibPromise) {
+            xlsxLibPromise = loadExternalScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js')
+                .then(() => window.XLSX);
+        }
+        return xlsxLibPromise;
+    }
+
+    async function exportToPDF() {
+        const { jsPDF } = await getJsPdf();
         const doc = new jsPDF();
         
         const answeredQuestions = questions.filter(q => userAnswers[q.id]?.category === currentCategory);
@@ -545,7 +579,8 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.save(`Compliance-Report-${currentCategory.replace('_', '-')}-${timestamp}.pdf`);
     }
 
-    function exportToExcel() {
+    async function exportToExcel() {
+        const XLSX = await getXlsx();
         const answeredQuestions = questions.filter(q => userAnswers[q.id]?.category === currentCategory);
         const yesAnswers = answeredQuestions.filter(q => userAnswers[q.id].answer === 'yes');
         const noAnswers = answeredQuestions.filter(q => userAnswers[q.id].answer === 'no');
