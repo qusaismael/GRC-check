@@ -436,7 +436,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const { jsPDF } = await getJsPdf();
         const doc = new jsPDF();
         
-        const answeredQuestions = questions.filter(q => userAnswers[q.id]?.category === currentCategory);
+        const answeredQuestions = questions.filter(q => userAnswers[q.id]?.category === currentCategory &&
+            (userAnswers[q.id].answer === 'yes' || userAnswers[q.id].answer === 'no'));
         const yesAnswers = answeredQuestions.filter(q => userAnswers[q.id].answer === 'yes');
         const noAnswers = answeredQuestions.filter(q => userAnswers[q.id].answer === 'no');
         const totalQuestions = questions.filter(q => q.category === currentCategory);
@@ -583,7 +584,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function exportToExcel() {
         const XLSX = await getXlsx();
-        const answeredQuestions = questions.filter(q => userAnswers[q.id]?.category === currentCategory);
+        const answeredQuestions = questions.filter(q => userAnswers[q.id]?.category === currentCategory &&
+            (userAnswers[q.id].answer === 'yes' || userAnswers[q.id].answer === 'no'));
         const yesAnswers = answeredQuestions.filter(q => userAnswers[q.id].answer === 'yes');
         const noAnswers = answeredQuestions.filter(q => userAnswers[q.id].answer === 'no');
         const totalQuestions = questions.filter(q => q.category === currentCategory);
@@ -624,9 +626,11 @@ document.addEventListener('DOMContentLoaded', () => {
             let status = 'PENDING REVIEW';
             
             if (answer) {
-                answerText = answer.answer.toUpperCase();
                 notes = answer.note && answer.note.trim() ? answer.note : 'No additional notes provided';
-                status = answer.answer === 'yes' ? 'COMPLIANT' : 'NON-COMPLIANT';
+                if (answer.answer === 'yes' || answer.answer === 'no') {
+                    answerText = answer.answer.toUpperCase();
+                    status = answer.answer === 'yes' ? 'COMPLIANT' : 'NON-COMPLIANT';
+                }
             }
             
             reportData.push([

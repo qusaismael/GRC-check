@@ -37,3 +37,46 @@ test('note-only entries stay pending in the answered count', () => {
   framework('jordan_law');
   assert.equal(document.querySelector('#answered-count').textContent, '1');
 });
+
+test('note-only Excel export stays pending and retains the note', async () => {
+  const { document, window, note, exportExcel } = assessment();
+  note('.note-input', 'draft note');
+  let workbook;
+  window.XLSX = {
+    utils: {
+      book_new: () => ({ sheets: {} }),
+      aoa_to_sheet: rows => ({ rows }),
+      book_append_sheet: (book, sheet, name) => { book.sheets[name] = sheet; }
+    },
+    writeFile: book => { workbook = book; }
+  };
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  document.head.appendChild(script);
+  await exportExcel();
+  const rows = workbook.sheets['Complete Assessment'].rows;
+  assert.equal(rows.find(row => row[0] === 'Questions Answered:')[1], 0);
+  assert.equal(rows.find(row => row[0] === 'Pending Review:')[1], 24);
+  const first = rows.find(row => row[0] === 'Article 3.A');
+  assert.deepEqual(Array.from(first).slice(2), ['NOT ANSWERED', 'draft note', 'PENDING REVIEW']);
+});
+
+test('note-only PDF export does not list a compliant or non-compliant area', async () => {
+  const { document, window, note, exportPdf } = assessment();
+  note('.note-input', 'draft note');
+  const lines = [];
+  window.jspdf = { jsPDF: class {
+    internal = { getNumberOfPages: () => 1 };
+    setFontSize() {} setFont() {} setTextColor() {} setLineWidth() {}
+    line() {} setPage() {} addPage() {} save() {}
+    text(value) { lines.push(value); }
+  } };
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+  document.head.appendChild(script);
+  await exportPdf();
+  assert.ok(lines.includes('Final Score: 0%'));
+  assert.ok(lines.includes('No items answered "Yes".'));
+  assert.ok(lines.includes('No items answered "No".'));
+  assert.equal(lines.some(line => line.includes('draft note')), false);
+});

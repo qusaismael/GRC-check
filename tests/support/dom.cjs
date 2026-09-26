@@ -14,6 +14,23 @@ function assessment() {
   };
   window.localStorage = localStorage;
   window.scrollTo = () => {};
+  const select = document.querySelector('#checklist-select');
+  Object.defineProperty(select, 'options', { configurable: true, value: Array.from(select.querySelectorAll('option')) });
+  Object.defineProperty(select, 'selectedIndex', { configurable: true, get: () => select.value === 'iso_27001' ? 1 : 0 });
+  let exportExcelHandler;
+  let exportPdfHandler;
+  const excelButton = document.querySelector('#export-excel');
+  const pdfButton = document.querySelector('#export-pdf');
+  const addPdfListener = pdfButton.addEventListener.bind(pdfButton);
+  pdfButton.addEventListener = (type, handler) => {
+    if (type === 'click') exportPdfHandler = handler;
+    addPdfListener(type, handler);
+  };
+  const addExcelListener = excelButton.addEventListener.bind(excelButton);
+  excelButton.addEventListener = (type, handler) => {
+    if (type === 'click') exportExcelHandler = handler;
+    addExcelListener(type, handler);
+  };
   vm.runInNewContext(script, { window, document, localStorage, setTimeout, FileReader: class {}, Image: class {}, console });
   document.dispatchEvent(new window.Event('DOMContentLoaded'));
 
@@ -28,7 +45,7 @@ function assessment() {
     Object.defineProperty(select, 'value', { configurable: true, value: name });
     select.dispatchEvent(new window.Event('change', { bubbles: true }));
   };
-  return { document, window, click, note, framework };
+  return { document, window, click, note, framework, exportExcel: () => exportExcelHandler(), exportPdf: () => exportPdfHandler() };
 }
 
 module.exports = { assessment };

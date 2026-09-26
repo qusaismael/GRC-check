@@ -38,3 +38,28 @@ test('note-only entries stay pending', async ({ page }) => {
   await expect(page.locator('#answered-count')).toHaveText('1');
   await expect(page.locator('#score-text')).toHaveText('4%');
 });
+
+test('note-only Excel export stays pending', async ({ page }) => {
+  await page.route('**/xlsx.full.min.js', route => route.fulfill({
+    contentType: 'application/javascript',
+    body: `window.XLSX = {
+      utils: {
+        book_new: () => ({ sheets: {} }),
+        aoa_to_sheet: rows => ({ rows }),
+        book_append_sheet: (book, sheet, name) => { book.sheets[name] = sheet; }
+      },
+      writeFile: book => { window.exportedRows = book.sheets['Complete Assessment'].rows; }
+    };`
+  }));
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.locator('.note-input').first().fill('draft note');
+  await page.evaluate(() => document.querySelector('#export-excel').click());
+  await expect.poll(() => page.evaluate(() => window.exportedRows)).toBeTruthy();
+  const rows = await page.evaluate(() => window.exportedRows);
+  expect(rows.find(row => row[0] === 'Questions Answered:')[1]).toBe(0);
+  expect(rows.find(row => row[0] === 'Pending Review:')[1]).toBe(24);
+  expect(rows.find(row => row[0] === 'Article 3.A').slice(2))
+    .toEqual(['NOT ANSWERED', 'draft note', 'PENDING REVIEW']);
+  expect(errors).toEqual([]);
+});
