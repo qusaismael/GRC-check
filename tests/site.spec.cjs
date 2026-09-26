@@ -113,3 +113,13 @@ test('mobile score details use an operable disclosure', async ({ page }) => {
   await expect(button).toHaveAttribute('aria-expanded', 'false');
   await expect(button).toBeFocused();
 });
+
+test('mobile score button names the current percentage', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const button = page.locator('#floating-score-btn');
+  await expect(button).toHaveAttribute('aria-label', 'Compliance score: 0%. Show details');
+  await page.locator('.yes-btn').first().click();
+  await expect(button).toHaveAttribute('aria-label', 'Compliance score: 4%. Show details');
+  await button.click();
+  await expect(button).toHaveAttribute('aria-label', 'Compliance score: 4%. Hide details');
+});

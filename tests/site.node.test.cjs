@@ -122,10 +122,26 @@ test('mobile score details stay hidden until opened', () => {
   assert.equal(popup.hasAttribute('hidden'), true);
   click('#floating-score-btn');
   assert.equal(button.getAttribute('aria-expanded'), 'true');
-  assert.equal(button.getAttribute('aria-label'), 'Hide compliance score details');
+  assert.equal(button.getAttribute('aria-label'), 'Compliance score: 0%. Hide details');
   assert.equal(popup.hasAttribute('hidden'), false);
   click('#popup-close');
   assert.equal(button.getAttribute('aria-expanded'), 'false');
-  assert.equal(button.getAttribute('aria-label'), 'Show compliance score details');
+  assert.equal(button.getAttribute('aria-label'), 'Compliance score: 0%. Show details');
   assert.equal(popup.hasAttribute('hidden'), true);
+});
+
+test('mobile score control announces its calculated percentage', () => {
+  const { document, click } = assessment();
+  const label = () => document.querySelector('#floating-score-btn').getAttribute('aria-label');
+  assert.equal(label(), 'Compliance score: 0%. Show details');
+  click('.yes-btn');
+  assert.equal(label(), 'Compliance score: 4%. Show details');
+  click('#floating-score-btn');
+  assert.equal(label(), 'Compliance score: 4%. Hide details');
+  click('.no-btn');
+  assert.equal(label(), 'Compliance score: 0%. Show details');
+  click('#floating-score-btn');
+  assert.equal(label(), 'Compliance score: 0%. Hide details');
+  click('#popup-close');
+  assert.equal(label(), 'Compliance score: 0%. Show details');
 });

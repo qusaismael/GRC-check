@@ -252,6 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
             scoreText.textContent = '0%';
             floatingScoreText.textContent = '0%';
             popupScoreText.textContent = '0%';
+            updateFloatingScoreLabel();
             const noProgressGradient = `conic-gradient(var(--border-color) 360deg, var(--border-color) 0deg)`;
             scoreCircle.style.background = noProgressGradient;
             popupScoreCircle.style.background = noProgressGradient;
@@ -264,6 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
         scoreText.textContent = `${score}%`;
         floatingScoreText.textContent = `${score}%`;
         popupScoreText.textContent = `${score}%`;
+        updateFloatingScoreLabel();
         const degree = (score / 100) * 360;
         
         const circleGradient = `conic-gradient(var(--success-color) ${degree}deg, var(--danger-color) ${degree}deg)`;
@@ -846,6 +848,11 @@ document.addEventListener('DOMContentLoaded', () => {
         updateScore();
     }
     
+    function updateFloatingScoreLabel() {
+        const action = floatingScorePopup.hidden ? 'Show' : 'Hide';
+        floatingScoreBtn.setAttribute('aria-label', `Compliance score: ${floatingScoreText.textContent}. ${action} details`);
+    }
+
     function toggleFloatingPopup() {
         if (!floatingScorePopup.hidden) {
             closeFloatingPopup();
@@ -854,14 +861,14 @@ document.addEventListener('DOMContentLoaded', () => {
         floatingScorePopup.hidden = false;
         floatingScorePopup.classList.add('show');
         floatingScoreBtn.setAttribute('aria-expanded', 'true');
-        floatingScoreBtn.setAttribute('aria-label', 'Hide compliance score details');
+        updateFloatingScoreLabel();
     }
     
     function closeFloatingPopup(restoreFocus = false) {
         floatingScorePopup.classList.remove('show');
         floatingScorePopup.hidden = true;
         floatingScoreBtn.setAttribute('aria-expanded', 'false');
-        floatingScoreBtn.setAttribute('aria-label', 'Show compliance score details');
+        updateFloatingScoreLabel();
         if (restoreFocus) floatingScoreBtn.focus();
     }
     
