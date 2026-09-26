@@ -225,9 +225,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="note-section">
                     <label for="note-${q.id}">Notes (optional):</label>
                     <textarea id="note-${q.id}" class="note-input" placeholder="Add any additional notes or comments..."
-                              data-id="${q.id}">${currentNote}</textarea>
+                              data-id="${q.id}"></textarea>
                 </div>
             `;
+            card.querySelector('.note-input').value = currentNote;
             questionnaireContainer.appendChild(card);
         });
     }

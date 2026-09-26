@@ -21,3 +21,13 @@ test('framework answers survive switching', async ({ page }) => {
   await page.locator('#checklist-select').selectOption('iso_27001');
   await expect(page.locator('.no-btn').first()).toHaveClass(/answered/);
 });
+
+test('notes render as literal text', async ({ page }) => {
+  const note = '</textarea><img src=x onerror="window.noteExecuted=1">';
+  await page.locator('.note-input').first().fill(note);
+  await page.locator('#checklist-select').selectOption('iso_27001');
+  await page.locator('#checklist-select').selectOption('jordan_law');
+  await expect(page.locator('.note-input').first()).toHaveValue(note);
+  await expect(page.locator('.question-card img')).toHaveCount(0);
+  expect(await page.evaluate(() => window.noteExecuted)).toBeUndefined();
+});

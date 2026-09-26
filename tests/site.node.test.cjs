@@ -15,3 +15,13 @@ test('framework answers and notes survive switching independently', () => {
   framework('iso_27001');
   assert.equal(document.querySelector('.no-btn').classList.contains('answered'), true);
 });
+
+test('notes render as literal text on framework return', () => {
+  const { document, note, framework } = assessment();
+  const literal = '</textarea><img src=x onerror="window.noteExecuted=1">';
+  note('.note-input', literal);
+  framework('iso_27001');
+  framework('jordan_law');
+  assert.equal(document.querySelector('.note-input').value, literal);
+  assert.equal(document.querySelectorAll('.question-card img').length, 0);
+});
