@@ -99,15 +99,15 @@
 
     <!-- Mobile Floating Score Button -->
     <div class="mobile-score-float" id="mobile-score-float">
-        <button class="floating-score-btn" id="floating-score-btn">
+        <button type="button" class="floating-score-btn" id="floating-score-btn" aria-label="Show compliance score details" aria-controls="floating-score-popup" aria-expanded="false">
             <span class="floating-score-text" id="floating-score-text">100%</span>
             <span class="floating-score-icon">📊</span>
         </button>
         
-        <div class="floating-score-popup" id="floating-score-popup">
+        <div class="floating-score-popup" id="floating-score-popup" role="region" aria-labelledby="score-popup-title" hidden>
             <div class="popup-header">
-                <h3>Compliance Score</h3>
-                <button class="popup-close" id="popup-close">×</button>
+                <h3 id="score-popup-title">Compliance Score</h3>
+                <button type="button" class="popup-close" id="popup-close" aria-label="Close score details">×</button>
             </div>
             <div class="popup-score-display">
                 <div class="popup-score-circle" id="popup-score-circle">

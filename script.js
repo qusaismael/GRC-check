@@ -847,11 +847,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function toggleFloatingPopup() {
-        floatingScorePopup.classList.toggle('show');
+        if (!floatingScorePopup.hidden) {
+            closeFloatingPopup();
+            return;
+        }
+        floatingScorePopup.hidden = false;
+        floatingScorePopup.classList.add('show');
+        floatingScoreBtn.setAttribute('aria-expanded', 'true');
+        floatingScoreBtn.setAttribute('aria-label', 'Hide compliance score details');
     }
     
-    function closeFloatingPopup() {
+    function closeFloatingPopup(restoreFocus = false) {
         floatingScorePopup.classList.remove('show');
+        floatingScorePopup.hidden = true;
+        floatingScoreBtn.setAttribute('aria-expanded', 'false');
+        floatingScoreBtn.setAttribute('aria-label', 'Show compliance score details');
+        if (restoreFocus) floatingScoreBtn.focus();
     }
     
     function handleOutsideClick(e) {
@@ -870,7 +881,7 @@ document.addEventListener('DOMContentLoaded', () => {
     signatureInput.addEventListener('change', handleSignatureUpload);
     
     floatingScoreBtn.addEventListener('click', toggleFloatingPopup);
-    popupClose.addEventListener('click', closeFloatingPopup);
+    popupClose.addEventListener('click', () => closeFloatingPopup(true));
     document.addEventListener('click', handleOutsideClick);
     
     // Back to Top Button functionality

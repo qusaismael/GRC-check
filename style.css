@@ -1595,6 +1595,10 @@ body {
     overflow: hidden;
 }
 
+.floating-score-popup[hidden] {
+    display: none;
+}
+
 .floating-score-popup.show {
     transform: scale(1) translateY(0);
     opacity: 1;
@@ -1631,8 +1635,8 @@ body {
     color: var(--text-light);
     cursor: pointer;
     padding: 0;
-    width: 24px;
-    height: 24px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;

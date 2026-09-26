@@ -92,3 +92,24 @@ test('answer buttons expose selected state to assistive technology', async ({ pa
   await page.locator('.edit-btn').first().click();
   await expect(no).toHaveAttribute('aria-pressed', 'false');
 });
+
+test('mobile score details use an operable disclosure', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const button = page.locator('#floating-score-btn');
+  const popup = page.locator('#floating-score-popup');
+  await expect(button).toHaveAttribute('aria-controls', 'floating-score-popup');
+  await expect(button).toHaveAttribute('aria-expanded', 'false');
+  await expect(popup).toBeHidden();
+  await button.focus();
+  await page.keyboard.press('Enter');
+  await expect(button).toHaveAttribute('aria-expanded', 'true');
+  await expect(popup).toBeVisible();
+  const close = page.getByRole('button', { name: 'Close score details' });
+  const size = await close.boundingBox();
+  expect(size.width).toBeGreaterThanOrEqual(44);
+  expect(size.height).toBeGreaterThanOrEqual(44);
+  await close.click();
+  await expect(popup).toBeHidden();
+  await expect(button).toHaveAttribute('aria-expanded', 'false');
+  await expect(button).toBeFocused();
+});

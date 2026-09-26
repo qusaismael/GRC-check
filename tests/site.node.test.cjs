@@ -112,3 +112,20 @@ test('answer buttons expose their pressed state across edits and frameworks', ()
   click('.edit-btn');
   assert.equal(pressed('.no-btn'), 'false');
 });
+
+test('mobile score details stay hidden until opened', () => {
+  const { document, click } = assessment();
+  const button = document.querySelector('#floating-score-btn');
+  const popup = document.querySelector('#floating-score-popup');
+  assert.equal(button.getAttribute('aria-controls'), 'floating-score-popup');
+  assert.equal(button.getAttribute('aria-expanded'), 'false');
+  assert.equal(popup.hasAttribute('hidden'), true);
+  click('#floating-score-btn');
+  assert.equal(button.getAttribute('aria-expanded'), 'true');
+  assert.equal(button.getAttribute('aria-label'), 'Hide compliance score details');
+  assert.equal(popup.hasAttribute('hidden'), false);
+  click('#popup-close');
+  assert.equal(button.getAttribute('aria-expanded'), 'false');
+  assert.equal(button.getAttribute('aria-label'), 'Show compliance score details');
+  assert.equal(popup.hasAttribute('hidden'), true);
+});
