@@ -94,3 +94,21 @@ test('editing a choice returns it to pending without losing its note', () => {
   assert.equal(document.querySelector('.yes-btn').classList.contains('answered'), false);
   assert.equal(document.querySelector('.note-input').value, 'needs review');
 });
+
+test('answer buttons expose their pressed state across edits and frameworks', () => {
+  const { document, click, framework } = assessment();
+  const pressed = selector => document.querySelector(selector).getAttribute('aria-pressed');
+  assert.equal(pressed('.yes-btn'), 'false');
+  assert.equal(pressed('.no-btn'), 'false');
+  click('.yes-btn');
+  assert.equal(pressed('.yes-btn'), 'true');
+  assert.equal(pressed('.no-btn'), 'false');
+  framework('iso_27001');
+  framework('jordan_law');
+  assert.equal(pressed('.yes-btn'), 'true');
+  click('.no-btn');
+  assert.equal(pressed('.yes-btn'), 'false');
+  assert.equal(pressed('.no-btn'), 'true');
+  click('.edit-btn');
+  assert.equal(pressed('.no-btn'), 'false');
+});

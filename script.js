@@ -215,9 +215,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p>${q.question}</p>
                 <div class="button-group">
                     <div class="answer-row">
-                        <button class="yes-btn ${currentAnswer?.answer === 'yes' ? 'answered' : ''}" 
+                        <button class="yes-btn ${currentAnswer?.answer === 'yes' ? 'answered' : ''}"
+                                aria-pressed="${currentAnswer?.answer === 'yes'}"
                                 data-id="${q.id}" data-answer="yes">Yes</button>
-                        <button class="no-btn ${currentAnswer?.answer === 'no' ? 'answered' : ''}" 
+                        <button class="no-btn ${currentAnswer?.answer === 'no' ? 'answered' : ''}"
+                                aria-pressed="${currentAnswer?.answer === 'no'}"
                                 data-id="${q.id}" data-answer="no">No</button>
                     </div>
                     ${currentAnswer?.answer ? '<button class="edit-btn" data-id="' + q.id + '">Edit Choice</button>' : ''}
@@ -291,6 +293,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Remove answered styling and enable editing
             yesBtn.classList.remove('answered');
             noBtn.classList.remove('answered');
+            yesBtn.setAttribute('aria-pressed', 'false');
+            noBtn.setAttribute('aria-pressed', 'false');
             
             // Remove the edit button
             target.remove();
@@ -315,6 +319,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Add answered styling to clicked button
         target.classList.add('answered');
+        yesBtn.setAttribute('aria-pressed', String(answer === 'yes'));
+        noBtn.setAttribute('aria-pressed', String(answer === 'no'));
         
         // Add or update edit button
         let editBtn = buttonGroup.querySelector('.edit-btn');

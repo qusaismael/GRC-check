@@ -75,3 +75,20 @@ test('editing a choice returns it to pending', async ({ page }) => {
   await expect(page.locator('.yes-btn').first()).not.toHaveClass(/answered/);
   await expect(page.locator('.note-input').first()).toHaveValue('needs review');
 });
+
+test('answer buttons expose selected state to assistive technology', async ({ page }) => {
+  const yes = page.locator('.yes-btn').first();
+  const no = page.locator('.no-btn').first();
+  await expect(yes).toHaveAttribute('aria-pressed', 'false');
+  await expect(no).toHaveAttribute('aria-pressed', 'false');
+  await yes.click();
+  await expect(yes).toHaveAttribute('aria-pressed', 'true');
+  await page.locator('#checklist-select').selectOption('iso_27001');
+  await page.locator('#checklist-select').selectOption('jordan_law');
+  await expect(yes).toHaveAttribute('aria-pressed', 'true');
+  await no.click();
+  await expect(no).toHaveAttribute('aria-pressed', 'true');
+  await expect(yes).toHaveAttribute('aria-pressed', 'false');
+  await page.locator('.edit-btn').first().click();
+  await expect(no).toHaveAttribute('aria-pressed', 'false');
+});
