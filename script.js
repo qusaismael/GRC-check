@@ -215,9 +215,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p>${q.question}</p>
                 <div class="button-group">
                     <div class="answer-row">
-                        <button class="yes-btn ${currentAnswer?.answer === 'yes' ? 'answered' : ''}" 
+                        <button class="yes-btn ${currentAnswer?.answer === 'yes' ? 'answered' : ''}"
+                                aria-pressed="${currentAnswer?.answer === 'yes'}"
                                 data-id="${q.id}" data-answer="yes">Yes</button>
-                        <button class="no-btn ${currentAnswer?.answer === 'no' ? 'answered' : ''}" 
+                        <button class="no-btn ${currentAnswer?.answer === 'no' ? 'answered' : ''}"
+                                aria-pressed="${currentAnswer?.answer === 'no'}"
                                 data-id="${q.id}" data-answer="no">No</button>
                     </div>
                     ${currentAnswer?.answer ? '<button class="edit-btn" data-id="' + q.id + '">Edit Choice</button>' : ''}
@@ -225,16 +227,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="note-section">
                     <label for="note-${q.id}">Notes (optional):</label>
                     <textarea id="note-${q.id}" class="note-input" placeholder="Add any additional notes or comments..."
-                              data-id="${q.id}">${currentNote}</textarea>
+                              data-id="${q.id}"></textarea>
                 </div>
             `;
+            card.querySelector('.note-input').value = currentNote;
             questionnaireContainer.appendChild(card);
         });
     }
 
     function updateScore() {
         const filteredQuestions = questions.filter(q => q.category === currentCategory);
-        const answeredQuestions = Object.values(userAnswers).filter(ans => ans.category === currentCategory);
+        const answeredQuestions = Object.values(userAnswers).filter(ans =>
+            ans.category === currentCategory && (ans.answer === 'yes' || ans.answer === 'no'));
         
         const answeredCount = document.getElementById('answered-count');
         const totalCount = document.getElementById('total-count');
@@ -248,6 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
             scoreText.textContent = '0%';
             floatingScoreText.textContent = '0%';
             popupScoreText.textContent = '0%';
+            updateFloatingScoreLabel();
             const noProgressGradient = `conic-gradient(var(--border-color) 360deg, var(--border-color) 0deg)`;
             scoreCircle.style.background = noProgressGradient;
             popupScoreCircle.style.background = noProgressGradient;
@@ -260,6 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
         scoreText.textContent = `${score}%`;
         floatingScoreText.textContent = `${score}%`;
         popupScoreText.textContent = `${score}%`;
+        updateFloatingScoreLabel();
         const degree = (score / 100) * 360;
         
         const circleGradient = `conic-gradient(var(--success-color) ${degree}deg, var(--danger-color) ${degree}deg)`;
@@ -279,7 +285,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = parseInt(target.dataset.id, 10);
         
         if (target.classList.contains('edit-btn')) {
-            // Handle edit button click - allow changing answer
+            // Return this choice to pending while keeping its note.
+            userAnswers[id].answer = null;
             const buttonGroup = target.parentElement;
             const answerRow = buttonGroup.querySelector('.answer-row');
             const yesBtn = answerRow.querySelector('.yes-btn');
@@ -288,10 +295,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Remove answered styling and enable editing
             yesBtn.classList.remove('answered');
             noBtn.classList.remove('answered');
+            yesBtn.setAttribute('aria-pressed', 'false');
+            noBtn.setAttribute('aria-pressed', 'false');
             
             // Remove the edit button
             target.remove();
-            
+            updateScore();
             return;
         }
 
@@ -312,6 +321,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Add answered styling to clicked button
         target.classList.add('answered');
+        yesBtn.setAttribute('aria-pressed', String(answer === 'yes'));
+        noBtn.setAttribute('aria-pressed', String(answer === 'no'));
         
         // Add or update edit button
         let editBtn = buttonGroup.querySelector('.edit-btn');
@@ -434,7 +445,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const { jsPDF } = await getJsPdf();
         const doc = new jsPDF();
         
-        const answeredQuestions = questions.filter(q => userAnswers[q.id]?.category === currentCategory);
+        const answeredQuestions = questions.filter(q => userAnswers[q.id]?.category === currentCategory &&
+            (userAnswers[q.id].answer === 'yes' || userAnswers[q.id].answer === 'no'));
         const yesAnswers = answeredQuestions.filter(q => userAnswers[q.id].answer === 'yes');
         const noAnswers = answeredQuestions.filter(q => userAnswers[q.id].answer === 'no');
         const totalQuestions = questions.filter(q => q.category === currentCategory);
@@ -581,7 +593,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function exportToExcel() {
         const XLSX = await getXlsx();
-        const answeredQuestions = questions.filter(q => userAnswers[q.id]?.category === currentCategory);
+        const answeredQuestions = questions.filter(q => userAnswers[q.id]?.category === currentCategory &&
+            (userAnswers[q.id].answer === 'yes' || userAnswers[q.id].answer === 'no'));
         const yesAnswers = answeredQuestions.filter(q => userAnswers[q.id].answer === 'yes');
         const noAnswers = answeredQuestions.filter(q => userAnswers[q.id].answer === 'no');
         const totalQuestions = questions.filter(q => q.category === currentCategory);
@@ -622,9 +635,11 @@ document.addEventListener('DOMContentLoaded', () => {
             let status = 'PENDING REVIEW';
             
             if (answer) {
-                answerText = answer.answer.toUpperCase();
                 notes = answer.note && answer.note.trim() ? answer.note : 'No additional notes provided';
-                status = answer.answer === 'yes' ? 'COMPLIANT' : 'NON-COMPLIANT';
+                if (answer.answer === 'yes' || answer.answer === 'no') {
+                    answerText = answer.answer.toUpperCase();
+                    status = answer.answer === 'yes' ? 'COMPLIANT' : 'NON-COMPLIANT';
+                }
             }
             
             reportData.push([
@@ -829,17 +844,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleCategoryChange(e) {
         currentCategory = e.target.value;
-        userAnswers = {};
         renderQuestions();
         updateScore();
     }
     
+    function updateFloatingScoreLabel() {
+        const action = floatingScorePopup.hidden ? 'Show' : 'Hide';
+        floatingScoreBtn.setAttribute('aria-label', `Compliance score: ${floatingScoreText.textContent}. ${action} details`);
+    }
+
     function toggleFloatingPopup() {
-        floatingScorePopup.classList.toggle('show');
+        if (!floatingScorePopup.hidden) {
+            closeFloatingPopup();
+            return;
+        }
+        floatingScorePopup.hidden = false;
+        floatingScorePopup.classList.add('show');
+        floatingScoreBtn.setAttribute('aria-expanded', 'true');
+        updateFloatingScoreLabel();
     }
     
-    function closeFloatingPopup() {
+    function closeFloatingPopup(restoreFocus = false) {
         floatingScorePopup.classList.remove('show');
+        floatingScorePopup.hidden = true;
+        floatingScoreBtn.setAttribute('aria-expanded', 'false');
+        updateFloatingScoreLabel();
+        if (restoreFocus) floatingScoreBtn.focus();
     }
     
     function handleOutsideClick(e) {
@@ -858,7 +888,7 @@ document.addEventListener('DOMContentLoaded', () => {
     signatureInput.addEventListener('change', handleSignatureUpload);
     
     floatingScoreBtn.addEventListener('click', toggleFloatingPopup);
-    popupClose.addEventListener('click', closeFloatingPopup);
+    popupClose.addEventListener('click', () => closeFloatingPopup(true));
     document.addEventListener('click', handleOutsideClick);
     
     // Back to Top Button functionality
