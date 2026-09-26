@@ -31,3 +31,10 @@ test('notes render as literal text', async ({ page }) => {
   await expect(page.locator('.question-card img')).toHaveCount(0);
   expect(await page.evaluate(() => window.noteExecuted)).toBeUndefined();
 });
+
+test('note-only entries stay pending', async ({ page }) => {
+  await page.locator('.note-input').first().fill('not answered yet');
+  await page.locator('.question-card').nth(1).locator('.yes-btn').click();
+  await expect(page.locator('#answered-count')).toHaveText('1');
+  await expect(page.locator('#score-text')).toHaveText('4%');
+});

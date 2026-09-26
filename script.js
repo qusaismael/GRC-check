@@ -235,7 +235,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateScore() {
         const filteredQuestions = questions.filter(q => q.category === currentCategory);
-        const answeredQuestions = Object.values(userAnswers).filter(ans => ans.category === currentCategory);
+        const answeredQuestions = Object.values(userAnswers).filter(ans =>
+            ans.category === currentCategory && (ans.answer === 'yes' || ans.answer === 'no'));
         
         const answeredCount = document.getElementById('answered-count');
         const totalCount = document.getElementById('total-count');
