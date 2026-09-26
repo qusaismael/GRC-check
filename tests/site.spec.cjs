@@ -63,3 +63,15 @@ test('note-only Excel export stays pending', async ({ page }) => {
     .toEqual(['NOT ANSWERED', 'draft note', 'PENDING REVIEW']);
   expect(errors).toEqual([]);
 });
+
+test('editing a choice returns it to pending', async ({ page }) => {
+  await page.locator('.yes-btn').first().click();
+  await page.locator('.note-input').first().fill('needs review');
+  await page.locator('.edit-btn').first().click();
+  await expect(page.locator('#answered-count')).toHaveText('0');
+  await expect(page.locator('#score-text')).toHaveText('0%');
+  await page.locator('#checklist-select').selectOption('iso_27001');
+  await page.locator('#checklist-select').selectOption('jordan_law');
+  await expect(page.locator('.yes-btn').first()).not.toHaveClass(/answered/);
+  await expect(page.locator('.note-input').first()).toHaveValue('needs review');
+});

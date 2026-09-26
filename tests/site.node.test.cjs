@@ -80,3 +80,17 @@ test('note-only PDF export does not list a compliant or non-compliant area', asy
   assert.ok(lines.includes('No items answered "No".'));
   assert.equal(lines.some(line => line.includes('draft note')), false);
 });
+
+test('editing a choice returns it to pending without losing its note', () => {
+  const { document, click, note, framework } = assessment();
+  click('.yes-btn');
+  note('.note-input', 'needs review');
+  click('.edit-btn');
+  assert.equal(document.querySelector('#answered-count').textContent, '0');
+  assert.equal(document.querySelector('#score-text').textContent, '0%');
+  assert.equal(document.querySelector('.note-input').value, 'needs review');
+  framework('iso_27001');
+  framework('jordan_law');
+  assert.equal(document.querySelector('.yes-btn').classList.contains('answered'), false);
+  assert.equal(document.querySelector('.note-input').value, 'needs review');
+});

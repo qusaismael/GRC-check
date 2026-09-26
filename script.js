@@ -281,7 +281,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = parseInt(target.dataset.id, 10);
         
         if (target.classList.contains('edit-btn')) {
-            // Handle edit button click - allow changing answer
+            // Return this choice to pending while keeping its note.
+            userAnswers[id].answer = null;
             const buttonGroup = target.parentElement;
             const answerRow = buttonGroup.querySelector('.answer-row');
             const yesBtn = answerRow.querySelector('.yes-btn');
@@ -293,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Remove the edit button
             target.remove();
-            
+            updateScore();
             return;
         }
 
