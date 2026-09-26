@@ -1,0 +1,57 @@
+{
+  "scrollHeight": 17064,
+  "overflowX": 0,
+  "images": [],
+  "framework": {
+    "width": 308,
+    "height": 51.78125,
+    "left": 41,
+    "right": 349,
+    "visible": "visible"
+  },
+  "export": {
+    "width": 308,
+    "height": 53,
+    "left": 41,
+    "right": 349,
+    "visible": "visible"
+  },
+  "yes": {
+    "width": 292,
+    "height": 50,
+    "left": 49,
+    "right": 341,
+    "visible": "visible"
+  },
+  "no": {
+    "width": 292,
+    "height": 50,
+    "left": 49,
+    "right": 341,
+    "visible": "visible"
+  },
+  "sidebar": {
+    "width": 0,
+    "height": 0,
+    "left": 0,
+    "right": 0,
+    "visible": "visible"
+  },
+  "floatingScore": {
+    "width": 80,
+    "height": 80,
+    "left": 290,
+    "right": 370,
+    "visible": "visible"
+  },
+  "popupClose": {
+    "width": 0,
+    "height": 0,
+    "left": 370,
+    "right": 370,
+    "visible": "visible"
+  },
+  "selectedPressed": null,
+  "consentRole": null,
+  "errors": []
+}
