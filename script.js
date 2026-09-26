@@ -829,7 +829,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleCategoryChange(e) {
         currentCategory = e.target.value;
-        userAnswers = {};
         renderQuestions();
         updateScore();
     }
