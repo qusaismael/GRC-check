@@ -1226,13 +1226,13 @@ h1, h2, h3, h4 {
     }
 
     .control-group {
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 0.75rem;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
     }
 
     .control-group label {
-        min-width: 140px;
+        min-width: 0;
         text-align: left;
         font-size: 0.875rem;
     }
@@ -1240,7 +1240,6 @@ h1, h2, h3, h4 {
     #checklist-select {
         min-width: 0;
         width: 100%;
-        flex: 1;
     }
 
     .file-upload-section {
